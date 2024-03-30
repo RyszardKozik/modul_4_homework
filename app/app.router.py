@@ -1,18 +1,29 @@
-from flask import Flask, render_template, request, redirect, url_for
+import http.server
+import socketserver
 
-app = Flask(__name__)
+# Define the HTTP request handler
+class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            with open('index.html', 'rb') as file:
+                self.wfile.write(file.read())
+        elif self.path == '/message':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            with open('message.html', 'rb') as file:
+                self.wfile.write(file.read())
+        else:
+            self.send_error(404)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# Define HTTP server parameters
+host = 'localhost'
+port = 3000
 
-@app.route('/message')
-def message():
-    return render_template('message.html')
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('error.html'), 404
-
-if __name__ == '__main__':
-    app.run(port=3000)
+# Create and run the HTTP server
+with socketserver.TCPServer((host, port), MyHttpRequestHandler) as httpd:
+    print(f"HTTP server is running at http://{host}:{port}")
+    httpd.serve_forever()
