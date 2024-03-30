@@ -1,0 +1,28 @@
+/* Reset margins and padding for all elements */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/* Styling for the header */
+header {
+    background-color: #333; /* Background color */
+    color: #fff; /* Text color */
+    padding: 20px; /* Inner padding */
+    text-align: center; /* Text alignment */
+}
+
+/* Styling for the main content */
+main {
+    margin: 20px; /* Outer margins */
+}
+
+/* Styling for links */
+a {
+    color: #007bff; /* Link color */
+    text-decoration: none; /* No underline */
+}
+
+a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
