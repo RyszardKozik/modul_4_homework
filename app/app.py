@@ -1,27 +1,40 @@
-from flask import Flask, render_template, request, redirect, url_for
+import http.server
+import socketserver
 import json
 import socket
+from urllib.parse import urlparse, parse_qs
+from http import HTTPStatus
 
-app = Flask(__name__, template_folder='templates')
+# Define the request handler class
+class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_POST(self):
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length)
+        
+        # Parse the POST data
+        parsed_data = parse_qs(post_data.decode('utf-8'))
+        username = parsed_data.get('username', [''])[0]
+        message = parsed_data.get('message', [''])[0]
+        
+        # Send data to socket
+        send_to_socket(username, message)
+        
+        # Send response
+        self.send_response(HTTPStatus.FOUND)
+        self.send_header('Location', '/')
+        self.end_headers()
 
-SOCKET_HOST = 'localhost'
-SOCKET_PORT = 5000
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    username = request.form['username']
-    message = request.form['message']
+# Define function to send data to socket
+def send_to_socket(username, message):
     data = {'username': username, 'message': message}
-    send_to_socket(data)
-    return redirect(url_for('index'))
-
-def send_to_socket(data):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.sendto(json.dumps(data).encode('utf-8'), (SOCKET_HOST, SOCKET_PORT))
+        s.sendto(json.dumps(data).encode('utf-8'), ('localhost', 5000))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Define HTTP server parameters
+host = 'localhost'
+port = 8000
+
+# Create and run the HTTP server
+with socketserver.TCPServer((host, port), MyHttpRequestHandler) as httpd:
+    print(f"HTTP server is running at http://{host}:{port}")
+    httpd.serve_forever()
