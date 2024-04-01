@@ -5,7 +5,6 @@ import os
 from threading import Thread
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # Constants and configuration variables
 SOCKET_IP = 'localhost'
@@ -15,12 +14,6 @@ STORAGE_DIR = 'storage'
 DATA_FILE = 'data.json'
 STATIC_DIR = 'static'
 
-# Jinja2 configuration
-env = Environment(
-    loader=FileSystemLoader('templates'),
-    autoescape=select_autoescape(['html'])
-)
-
 # HTTP request handler
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -28,14 +21,12 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            template = env.get_template('index.html')
-            self.wfile.write(template.render().encode('utf-8'))
+            self.wfile.write(b'<!DOCTYPE html><html><head><title>Home</title></head><body><h1>Hello</h1></body></html>')
         elif self.path == '/message':
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            template = env.get_template('message.html')
-            self.wfile.write(template.render().encode('utf-8'))
+            self.wfile.write(b'<!DOCTYPE html><html><head><title>Message</title></head><body><h1>Message Page</h1></body></html>')
         else:
             self.send_error(404, 'Not Found')
 
